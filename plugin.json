@@ -1,0 +1,25 @@
+{
+  "slug": "Visions",
+  "name": "Visions",
+  "version": "2.0.0",
+  "license": "CC-PDDC",
+  "brand": "Visions",
+  "author": "silver",
+  "authorEmail": "",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "changelogUrl": "",
+  "modules": [
+    {
+      "slug": "VideoOut",
+      "name": "VideoOut",
+      "description": "video synth output",
+      "tags": [
+        "visual"
+      ]
+    }
+  ]
+}
