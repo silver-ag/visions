@@ -18,7 +18,7 @@
       "name": "VideoOut",
       "description": "video synth output",
       "tags": [
-        "visual"
+        "visual", "polyphonic"
       ]
     }
   ]

@@ -12,8 +12,10 @@ struct VideoOut : Module {
 		PARAMS_LEN
 	};
 	enum InputId {
+		XY_POLY_INPUT,
 		X_INPUT,
 		Y_INPUT,
+		COLOUR_POLY_INPUT,
 		R_H_INPUT,
 		G_S_INPUT,
 		B_V_INPUT,
@@ -39,29 +41,54 @@ struct VideoOut : Module {
 		configButton(CLEAR_PARAM, "Clear");
 		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
+		configInput(XY_POLY_INPUT, "Polyphonic XY");
 		configInput(X_INPUT, "X coordinate");
 		configInput(Y_INPUT, "Y coordinate");
+		configInput(COLOUR_POLY_INPUT, "Polyphonic colour");
 		configInput(R_H_INPUT, "Red or Hue");
 		configInput(G_S_INPUT, "Green or Saturation");
 		configInput(B_V_INPUT, "Blue or Value");
 	}
 
 	void process(const ProcessArgs &args) override {
-		int x = int(clamp((inputs[X_INPUT].getVoltage() / 10) + 0.5f, 0.0, 0.999) * width);
-		int y = int(clamp((inputs[Y_INPUT].getVoltage() / 10) + 0.5f, 0.0, 0.999) * height);
-		int rh = int(clamp((inputs[R_H_INPUT].getVoltage() / 10) + 0.5f, 0.0, 0.999) * 256);
-		int gs = int(clamp((inputs[G_S_INPUT].getVoltage() / 10) + 0.5f, 0.0, 0.999) * 256);
-		int bv = int(clamp((inputs[B_V_INPUT].getVoltage() / 10) + 0.5f, 0.0, 0.999) * 256);
+		float x_voltage = 0;
+		float y_voltage = 0;
+		if (inputs[XY_POLY_INPUT].isConnected()) {
+			x_voltage = inputs[XY_POLY_INPUT].getPolyVoltage(0);
+			y_voltage = inputs[XY_POLY_INPUT].getPolyVoltage(1);
+		} else {
+			x_voltage = inputs[X_INPUT].getVoltage();
+			y_voltage = inputs[Y_INPUT].getVoltage();
+		}
+		int x = int(clamp((x_voltage / 10) + 0.5f, 0.0, 0.999) * width);
+		int y = int(clamp((y_voltage / 10) + 0.5f, 0.0, 0.999) * height);
+
+		float rh_voltage = 0;
+		float gs_voltage = 0;
+		float bv_voltage = 0;
+		if (inputs[COLOUR_POLY_INPUT].isConnected()) {
+			rh_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(0);
+			gs_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(1);
+			bv_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(2);
+		} else {
+			rh_voltage = inputs[R_H_INPUT].getVoltage();
+			gs_voltage = inputs[G_S_INPUT].getVoltage();
+			bv_voltage = inputs[B_V_INPUT].getVoltage();
+		}
+		int rh = int(clamp((rh_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+		int gs = int(clamp((gs_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+		int bv = int(clamp((bv_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+
 		int offset = 4 * (x + (y * height));
 		if (params[RGB_HSV_PARAM].getValue() == 0) {
 			screen_data[offset] = rh;
 			screen_data[offset+1] = gs;
 			screen_data[offset+2] = bv;
 		} else {
-			std::vector<int> hsv = hsv_to_rgb(rh, gs, bv);
-			screen_data[offset] = hsv[0];
-			screen_data[offset+1] = hsv[1];
-			screen_data[offset+2] = hsv[2];
+			std::vector<int> rgb = hsv_to_rgb(rh, gs, bv);
+			screen_data[offset] = rgb[0];
+			screen_data[offset+1] = rgb[1];
+			screen_data[offset+2] = rgb[2];
 		}
 
 		if (params[CLEAR_PARAM].getValue() == 1) {
@@ -137,24 +164,26 @@ struct VideoOutWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addParam(createParam<HorizontalSwitch>(mm2px(Vec(1.862, 83.554)), module, VideoOut::RGB_HSV_PARAM));
+		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 85)), module, VideoOut::RGB_HSV_PARAM));
 
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.407, 11.293)), module, VideoOut::X_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.407, 24.293)), module, VideoOut::Y_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.407, 45.293)), module, VideoOut::R_H_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.407, 58.8)), module, VideoOut::G_S_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.407, 71.8)), module, VideoOut::B_V_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 12)), module, VideoOut::XY_POLY_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 23.5)), module, VideoOut::X_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 32.5)), module, VideoOut::Y_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 50.5)), module, VideoOut::COLOUR_POLY_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 63)), module, VideoOut::R_H_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 72)), module, VideoOut::G_S_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 81)), module, VideoOut::B_V_INPUT));
 
 		// mm2px(Vec(112.94, 112.94))
-		VideoDisplay* display = createWidget<VideoDisplay>(mm2px(Vec(13.159, 8.008)));
+		VideoDisplay* display = createWidget<VideoDisplay>(mm2px(Vec(23.16, 8.008)));
 		display->module = module;
 		display->mw = this;
 		display->real_width = mm2px(112.94);
 		display->real_height = mm2px(112.94);
 		addChild(display);
 
-		addChild(createParam<VCVButton>(mm2px(Vec(4, 97)), module, VideoOut::CLEAR_PARAM));
-		addChild(createParam<Trimpot>(mm2px(Vec(4, 110)), module, VideoOut::RESOLUTION_PARAM));
+		addChild(createParam<VCVButton>(mm2px(Vec(6, 102)), module, VideoOut::CLEAR_PARAM));
+		addChild(createParam<Trimpot>(mm2px(Vec(6, 113)), module, VideoOut::RESOLUTION_PARAM));
 	}
 };
 
