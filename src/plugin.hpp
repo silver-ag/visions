@@ -11,3 +11,4 @@ extern Plugin* pluginInstance;
 // extern Model* modelMyModule;
 
 extern Model* modelVideoOut;
+extern Model* modelImageIn;

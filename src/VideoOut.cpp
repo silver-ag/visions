@@ -175,7 +175,7 @@ struct VideoOutWidget : ModuleWidget {
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 81)), module, VideoOut::B_V_INPUT));
 
 		// mm2px(Vec(112.94, 112.94))
-		VideoDisplay* display = createWidget<VideoDisplay>(mm2px(Vec(23.16, 8.008)));
+		VideoDisplay* display = createWidget<VideoDisplay>(mm2px(Vec(23.5, 8.008)));
 		display->module = module;
 		display->mw = this;
 		display->real_width = mm2px(112.94);
