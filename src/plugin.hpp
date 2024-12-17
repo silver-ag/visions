@@ -12,3 +12,4 @@ extern Plugin* pluginInstance;
 
 extern Model* modelVideoOut;
 extern Model* modelImageIn;
+extern Model* modelPathGenerator;

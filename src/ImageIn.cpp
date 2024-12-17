@@ -1,14 +1,8 @@
 #include "plugin.hpp"
 #include "osdialog.h"
 #include "widgets/switches.hpp"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmisleading-indentation"
-#pragma GCC diagnostic ignored "-Wshift-negative-value"
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough="
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#pragma GCC diagnostic pop
+ 
+#include "../dep/lodepng.h"
 
 std::vector<int> rgb_to_hsv(int r, int g, int b);
 
@@ -36,9 +30,8 @@ struct ImageIn : Module {
 	};
 
 	unsigned char* image_data = {};
-	int width = 0;
-	int height = 0;
-	int channels = 0;
+	unsigned int width = 0;
+	unsigned int height = 0;
 	int image = 0;
 	char* filename = "";
 
@@ -56,10 +49,10 @@ struct ImageIn : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+
 		if (params[LOAD_PARAM].getValue() == 1) {
 			get_filename();
 		}
-
 		float x_voltage = 0;
                 float y_voltage = 0;
                 if (inputs[POSITION_INPUT].isConnected()) {
@@ -73,6 +66,7 @@ struct ImageIn : Module {
                 int y = int(clamp((y_voltage / 10) + 0.5f, 0.0, 0.999) * height);
 
 		if (image > 0) {
+
 			int offset = 4 * (x + (y * height));
 			float rh_voltage = 0;
 			float gs_voltage = 0;
@@ -87,6 +81,7 @@ struct ImageIn : Module {
                                 gs_voltage = (10 * (float(hsv[1]) / 256)) - 5;
                                 bv_voltage = (10 * (float(hsv[2]) / 256)) - 5;
 			}
+
 			outputs[R_H_OUTPUT].setVoltage(rh_voltage);
 			outputs[G_S_OUTPUT].setVoltage(gs_voltage);
 			outputs[B_V_OUTPUT].setVoltage(bv_voltage);
@@ -94,7 +89,9 @@ struct ImageIn : Module {
 			outputs[COLOUR_OUTPUT].setVoltage(gs_voltage, 1);
 			outputs[COLOUR_OUTPUT].setVoltage(bv_voltage, 2);
 			outputs[COLOUR_OUTPUT].setChannels(3);
+
 		}
+
 	}
 
 	void get_filename() {
@@ -105,32 +102,22 @@ struct ImageIn : Module {
 	}
 
 	void load_file(char* filename) {
-		free(image_data);
-		unsigned char* local_data = stbi_load(filename, &width, &height, &channels, 0);
+		std::vector<unsigned char> local_data; //the raw pixels
+		//decode
+		unsigned int error = lodepng::decode(local_data, width, height, filename);
+		if(error) { fprintf(stderr, "decoder error %u: %s\n", error, lodepng_error_text(error)); }
+
+		// copy over to image_data directly, only reason is because we can't cast (vector<unsigned char>) to (unsigned char*)
 		image_data = new unsigned char[4 * width * height];
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				int local_offset = channels * (x + (y * height));
-				int image_offset = 4 * (x + (y * height));
-				if (channels == 1) {
-					image_data[image_offset] = local_data[local_offset];
-					image_data[image_offset+1] = local_data[local_offset];
-					image_data[image_offset+2] = local_data[local_offset];
-					image_data[image_offset+3] = 255;
-				} else if (channels == 3) {
-					image_data[image_offset] = local_data[local_offset];
-					image_data[image_offset+1] = local_data[local_offset+1];
-					image_data[image_offset+2] = local_data[local_offset+2];
-					image_data[image_offset+3] = 255;
-				} else if (channels == 4) {
-					image_data[image_offset] = local_data[local_offset];
-					image_data[image_offset+1] = local_data[local_offset+1];
-					image_data[image_offset+2] = local_data[local_offset+2];
-					image_data[image_offset+3] = local_data[local_offset+3];
-				}
+		for (unsigned int x = 0; x < width; x++) {
+			for (unsigned int y = 0; y < height; y++) {
+				int offset = 4 * (x + (y * height));
+				image_data[offset] = local_data[offset];
+				image_data[offset+1] = local_data[offset+1];
+				image_data[offset+2] = local_data[offset+2];
+				image_data[offset+3] = 255;
 			}
 		}
-		free(local_data);
 
 		image = -1;
 	}
@@ -144,8 +131,8 @@ struct ImageDisplay : TransparentWidget {
 		NVGcontext* vg = args.vg;
 		if (module && (layer == 1)) {
 			if (module->image == -1) {
-				//module->image = nvgCreateImageRGBA(vg, module->width, module->height, 0, module->image_data);
-				module->image = nvgCreateImage(vg, module->filename, 0);
+				module->image = nvgCreateImageRGBA(vg, module->width, module->height, 0, module->image_data);
+				//module->image = nvgCreateImage(vg, module->filename, 0);
 			}
 			if (module->image > 0) { // image can be 0 as well as -1
 				NVGpaint paint = nvgImagePattern(vg, 0, 0, module->width, module->height, 0, module->image, 1);
@@ -202,7 +189,7 @@ std::vector<int> rgb_to_hsv(int r_in, int g_in, int b_in)
     // compute v 
     float v = cmax * 100; 
 
-	return std::vector<int>({int(h),int(s),int(v)});
+	return std::vector<int>({int(h),int(3*s),int(3*v)}); // i don't know why these *3s are needed, but they get the output much closer to correct
 } 
   
 

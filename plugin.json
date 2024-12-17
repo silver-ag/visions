@@ -9,7 +9,7 @@
   "authorUrl": "",
   "pluginUrl": "",
   "manualUrl": "",
-  "sourceUrl": "",
+  "sourceUrl": "https://github.com/silver-ag/visions",
   "donateUrl": "",
   "changelogUrl": "",
   "modules": [
@@ -30,6 +30,15 @@
         "visual",
         "polyphonic"
       ]
+    },
+    {
+      "slug": "PathGenerator",
+      "name": "PathGenerator",
+      "description": "oscillator for generating position inputs for videosynth modules",
+      "tags": [
+        "polyphonic"
+      ]
     }
+
   ]
 }
