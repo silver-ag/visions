@@ -14,3 +14,4 @@ extern Model* modelVideoOut;
 extern Model* modelImageIn;
 extern Model* modelPathGenerator;
 extern Model* modelCoordinateFolder;
+extern Model* modelAffineTransform;
