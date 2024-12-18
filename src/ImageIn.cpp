@@ -33,7 +33,7 @@ struct ImageIn : Module {
 	unsigned int width = 0;
 	unsigned int height = 0;
 	int image = 0;
-	char* filename = "";
+	char* filename {};
 
 	ImageIn() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
