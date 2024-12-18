@@ -3,6 +3,7 @@
 struct PathGenerator : Module {
 	enum ParamId {
 		MODE_PARAM,
+		SPEED_PARAM,
 		RESOLUTION_PARAM,
 		PARAMS_LEN
 	};
@@ -19,14 +20,15 @@ struct PathGenerator : Module {
 		LIGHTS_LEN
 	};
 
-	int x_position = 0; // in terms of resolution
-	int y_position = 0;
+	float x_position = 0; // in terms of resolution
+	float y_position = 0;
 
 	int direction = 0; // for spiral mode
 
 	PathGenerator() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configSwitch(MODE_PARAM, 0.f, 3.f, 0.f, "Mode", {"Scanning", "Boustrophedon", "Spiral", "Random"});
+		configParam(SPEED_PARAM, 0, 1, 1, "Speed");
 		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
 		configOutput(POSITION_OUTPUT, "Polyphonic position");
@@ -36,65 +38,68 @@ struct PathGenerator : Module {
 
 	void process(const ProcessArgs& args) override {
 		int mode = params[MODE_PARAM].getValue();
+		float speed = params[SPEED_PARAM].getValue();
 		int res = params[RESOLUTION_PARAM].getValue();
 		if (mode == 0) { // scanning
-			x_position += 1;
+			x_position += speed;
 			if (x_position >= res) {
 				x_position = 0;
-				y_position += 1;
+				y_position += speed;
 				if (y_position >= res) {
-					y_position = 0;
+					y_position -= res;
 				}
 			}
 		} else if (mode == 1) { // boustro
-			if (y_position % 2 == 0) {
-				x_position += 1;
+			if (int(y_position) % 2 == 0) {
+				x_position += speed;
 				if (x_position >= res) {
-					y_position += 1;
+					y_position += speed;
 					if (y_position >= res) {
-						y_position = 0;
+						y_position -= res;
 					}
 				}
 			} else {
-				x_position -= 1;
+				x_position -= speed;
 				if (x_position < 0) {
-					y_position += 1;
+					y_position += speed;
 					if (y_position >= res) {
-						y_position = 0;
+						y_position -= res;
 					}
 				}
 			}
 		} else if (mode == 2) { // spiral
 			if (x_position < 0 or x_position > res) {
-				x_position = int(res/2);
+				x_position = res/2;
 			}
 			if (y_position < 0 or y_position > res) {
-				y_position = int(res/2);
+				y_position = res/2;
 			}
 			if (direction == 0) { // left
-				x_position += 1;
+				x_position += speed;
 				if (x_position > (res - y_position)) {
 					direction = 1;
 				}
 			} else if (direction == 1) { // down
-				y_position += 1;
+				y_position += speed;
 				if (y_position > x_position) {
 					direction = 2;
 				}
 			} else if (direction == 2) { // right
-				x_position -= 1;
+				x_position -= speed;
 				if (x_position < (res - y_position)) {
 					direction = 3;
 				}
 			} else if (direction == 3) { // up
-				y_position -= 1;
+				y_position -= speed;
 				if (y_position < x_position) {
 					direction = 0;
 				}
 			}
 		} else if (mode == 3) { // random
-			x_position = int(random::uniform() * res);
-			y_position = int(random::uniform() * res);
+			if (random::uniform() < speed) {
+				x_position = int(random::uniform() * res);
+				y_position = int(random::uniform() * res);
+			}
 		}
 		float x_voltage = (10 * float(x_position) / res) - 5;
 		float y_voltage = (10 * float(y_position) / res) - 5;
@@ -116,8 +121,9 @@ struct PathGeneratorWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
-		addChild(createParam<RoundBlackKnob>(mm2px(Vec(5.5, 20)), module, PathGenerator::MODE_PARAM));
-		addChild(createParam<Trimpot>(mm2px(Vec(7, 47)), module, PathGenerator::RESOLUTION_PARAM));
+		addChild(createParam<RoundBlackKnob>(mm2px(Vec(5.5, 15)), module, PathGenerator::MODE_PARAM));
+		addChild(createParam<RoundBlackKnob>(mm2px(Vec(5.5, 34)), module, PathGenerator::SPEED_PARAM));
+		addChild(createParam<Trimpot>(mm2px(Vec(7, 53)), module, PathGenerator::RESOLUTION_PARAM));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(8.5, 79.5)), module, PathGenerator::POSITION_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(8.5, 91)), module, PathGenerator::X_OUTPUT));

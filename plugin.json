@@ -38,7 +38,22 @@
       "tags": [
         "polyphonic"
       ]
+    },
+    {
+      "slug": "CoordinateFolder",
+      "name": "CoordinateFolder",
+      "description": "fold a 2d vector onto a subset of the plane",
+      "tags": [
+        "polyphonic"
+      ]
+    },
+    {
+      "slug": "AffineTransform",
+      "name": "AffineTransform",
+      "description": "apply cv-controllable affine transforms to 2d vectors",
+      "tags": [
+        "polyphonic"
+      ]
     }
-
   ]
 }

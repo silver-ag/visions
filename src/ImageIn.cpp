@@ -62,8 +62,8 @@ struct ImageIn : Module {
                         x_voltage = inputs[X_INPUT].getVoltage();
                         y_voltage = inputs[Y_INPUT].getVoltage();
                 }
-                int x = int(clamp((x_voltage / 10) + 0.5f, 0.0, 0.999) * width);
-                int y = int(clamp((y_voltage / 10) + 0.5f, 0.0, 0.999) * height);
+                int x = int(((x_voltage / 10) + 0.5f) * width) % width;
+                int y = int(((y_voltage / 10) + 0.5f) * height) % height;
 
 		if (image > 0) {
 
