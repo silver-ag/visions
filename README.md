@@ -2,7 +2,7 @@
 
 Visions is a VCV Rack 2 plugin for video synthesis.
 
-![the Vision modules in use](images/visions_demo.png)
+![the Vision modules in use](images/visionsdemo.gif)
 
 # Modules
 
