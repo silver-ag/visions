@@ -11,7 +11,6 @@ CXXFLAGS +=
 LDFLAGS +=
 
 # Add .cpp files to the build
-SOURCES += $(wildcard dep/*.cpp)
 SOURCES += $(wildcard src/*.cpp)
 
 # Add files to the ZIP package when running `make dist`

@@ -2,6 +2,8 @@
 
 Visions is a VCV Rack 2 plugin for video synthesis.
 
+![the Vision modules in use](images/vision_demo.png)
+
 ## Modules
 
 ### VideoOut
@@ -11,8 +13,6 @@ The VideoOut module draws input data on the screen. It has two sets of inputs - 
 ### ImageIn
 
 The ImageIn module reads sound data from an image file. The image file is selected by pressing the load button. It has one set of inputs - a position, and one set of outputs - a colour. Both can be used seperately or polyphonically (if both inputs are connected, the polyphonic input takes precedence). The module reads the colour of the pixel at the given position and gives that data as output, -5v to 5v.
-
-The ImageIn module only supports PNG images, and only some PNG images. If VCV crashes while trying to load an image, you can safely restart without clearing the patch, as the problem is only with that file. Even some images that load safely come out mangled. This has been the case with two seperate image libraries for some reason.
 
 ## PathGenerator
 

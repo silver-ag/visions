@@ -1,7 +1,7 @@
 #include "plugin.hpp"
 #include "osdialog.h"
 #include "widgets/switches.hpp"
-#include "../dep/lodepng.h"
+#include "stb_image.h"
 
 std::vector<int> rgb_to_hsv(int r, int g, int b);
 float fold_into_range(float n, float a, float b);
@@ -30,8 +30,8 @@ struct ImageIn : Module {
 	};
 
 	unsigned char* image_data = {};
-	unsigned int width = 0;
-	unsigned int height = 0;
+	int width = 0;
+	int height = 0;
 	int image = 0;
 	char* filename {};
 
@@ -67,7 +67,7 @@ struct ImageIn : Module {
 
 		if (image > 0) {
 
-			int offset = 4 * (x + (y * height));
+			int offset = ((4 * width) * y) + (4 * x);
 			float rh_voltage = 0;
 			float gs_voltage = 0;
 			float bv_voltage = 0;
@@ -95,30 +95,15 @@ struct ImageIn : Module {
 	}
 
 	void get_filename() {
-		filename = osdialog_file(OSDIALOG_OPEN, "", "", osdialog_filters_parse("png:png"));
+		filename = osdialog_file(OSDIALOG_OPEN, "", "", 0);
 		if (filename) {
 			load_file(filename);
 		}
 	}
 
 	void load_file(char* filename) {
-		std::vector<unsigned char> local_data; //the raw pixels
-		//decode
-		unsigned int error = lodepng::decode(local_data, width, height, filename);
-		if(error) { fprintf(stderr, "decoder error %u: %s\n", error, lodepng_error_text(error)); }
-
-		// copy over to image_data directly, only reason is because we can't cast (vector<unsigned char>) to (unsigned char*)
-		image_data = new unsigned char[4 * width * height];
-		for (unsigned int x = 0; x < width; x++) {
-			for (unsigned int y = 0; y < height; y++) {
-				int offset = 4 * (x + (y * height));
-				image_data[offset] = local_data[offset];
-				image_data[offset+1] = local_data[offset+1];
-				image_data[offset+2] = local_data[offset+2];
-				image_data[offset+3] = 255;
-			}
-		}
-
+		int channels = 0;
+		image_data = stbi_load(filename, &width, &height, &channels, 4);
 		image = -1;
 	}
 };
