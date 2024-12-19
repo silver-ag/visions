@@ -1,10 +1,10 @@
 #include "plugin.hpp"
 #include "osdialog.h"
 #include "widgets/switches.hpp"
- 
 #include "../dep/lodepng.h"
 
 std::vector<int> rgb_to_hsv(int r, int g, int b);
+float fold_into_range(float n, float a, float b);
 
 struct ImageIn : Module {
 	enum ParamId {
@@ -62,8 +62,8 @@ struct ImageIn : Module {
                         x_voltage = inputs[X_INPUT].getVoltage();
                         y_voltage = inputs[Y_INPUT].getVoltage();
                 }
-                int x = int(((x_voltage / 10) + 0.5f) * width) % width;
-                int y = int(((y_voltage / 10) + 0.5f) * height) % height;
+                int x = int(((fold_into_range(x_voltage,-5,5) / 10) + 0.5f) * width);
+                int y = int(((fold_into_range(y_voltage,-5,5) / 10) + 0.5f) * height);
 
 		if (image > 0) {
 
@@ -122,6 +122,22 @@ struct ImageIn : Module {
 		image = -1;
 	}
 };
+
+float fold_into_range(float n, float a, float b) {
+	if (a > b) {
+		float s = a;
+		a = b;
+		b = s;
+	}
+	float diff = b-a;
+	while (n < a) {
+		n += diff;
+	}
+	while (n > b) {
+		n -= diff;
+	}
+	return n;
+}
 
 struct ImageDisplay : TransparentWidget {
 	ImageIn* module = nullptr;

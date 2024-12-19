@@ -16,7 +16,7 @@ The ImageIn module only supports PNG images, and only some PNG images. If VCV cr
 
 ## PathGenerator
 
-The PathGenerator module is a kind of pair of LFOs configured to cover every possible pair of values up to the specified resolution. Its simplest intended purpose is to be plugged into the position inputs of both an ImageIn and a VideoOut, to scan across both in sync. It has four modes - Scanning, which scans each vertical line left to right, Boustrophedon, which scans alternately left to right then right to left, Spiral, which scans in a spiral out from the centre, and Random, which picks uniformly random values for each coordinate.
+The PathGenerator module is a kind of pair of oscillators configured to cover every possible pair of values up to the specified resolution. Its simplest intended purpose is to be plugged into the position inputs of both an ImageIn and a VideoOut, to scan across both in sync. It has four modes - Scanning, which scans each vertical line left to right, Boustrophedon, which scans alternately left to right then right to left, Spiral, which scans in a spiral out from the centre, and Random, which picks uniformly random values for each coordinate.
 
 To be absolutely strictly correct, in a simple setup with just an ImageIn and a VideoOut tied together with a PathGenerator, the position signal from the PathGenerator to the VideoOut must be delayed by one frame, so it hits the VideoOut in the same frame that the VideoOut is reporting the values it got from reading that position last frame. With more complex signal paths there may be a different offset. This doesn't matter at all except in the case of the random mode, where the signals must be precisely aligned on a frame-by-frame level for it to work at all.
 
@@ -24,6 +24,6 @@ To be absolutely strictly correct, in a simple setup with just an ImageIn and a 
 
 The CoordinateFolder takes a position and folds it onto a subset of the plane, either square or radial. It can be used to produce tiled or kaleidoscopic effects.
 
-## AffineTransform [unimplemented]
+## AffineTransform
 
 Fully voltage-controllable affine transform on 2d vectors

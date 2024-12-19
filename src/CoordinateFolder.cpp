@@ -4,7 +4,7 @@
 #define PI 3.14159265358979323846
 
 float mod(float a, float b);
-float lerp(float a, float b, float t);
+float lerp_cf(float a, float b, float t);
 
 struct CoordinateFolder : Module {
 	enum ParamId {
@@ -46,7 +46,7 @@ struct CoordinateFolder : Module {
 
 	void process(const ProcessArgs& args) override {
 		float amount = params[AMOUNT_PARAM].getValue();
-		amount = lerp(amount, inputs[AMOUNT_INPUT].getVoltage()+1, params[AMOUNT_MOD_PARAM].getValue());
+		amount = lerp_cf(amount, inputs[AMOUNT_INPUT].getVoltage()+1, params[AMOUNT_MOD_PARAM].getValue());
 		float x_in = 0;
 		float y_in = 0;
 		float x_out = 0;
@@ -80,17 +80,17 @@ struct CoordinateFolder : Module {
 };
 
 float mod(float a, float b) {
-	while (a > b) {
-		a -= b;
-	}
-	while (a < 0) {
-		a += b;
-	}
-	return a;
+        while (a > b) {
+                a -= b;
+        }
+        while (a < 0) {
+                a += b;
+        }
+        return a;
 }
 
-float lerp(float a, float b, float t) {
-	return (a * (1.0 - t)) + (b * t);
+float lerp_cf(float a, float b, float t) { // ass opposed to lerp_at in AffineTransform.cpp - a truly hideous kludge to avoid multiple definitions
+        return (a * (1.0 - t)) + (b * t);
 }
 
 struct CoordinateFolderWidget : ModuleWidget {

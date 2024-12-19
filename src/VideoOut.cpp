@@ -60,35 +60,38 @@ struct VideoOut : Module {
 			x_voltage = inputs[X_INPUT].getVoltage();
 			y_voltage = inputs[Y_INPUT].getVoltage();
 		}
-		int x = int(((x_voltage / 10) + 0.5f) * width) % width;
-		int y = int(((y_voltage / 10) + 0.5f) * height) % height;
+		int x = int(((x_voltage / 10) + 0.5f) * width);
+		int y = int(((y_voltage / 10) + 0.5f) * height);
 
-		float rh_voltage = 0;
-		float gs_voltage = 0;
-		float bv_voltage = 0;
-		if (inputs[COLOUR_POLY_INPUT].isConnected()) {
-			rh_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(0);
-			gs_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(1);
-			bv_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(2);
-		} else {
-			rh_voltage = inputs[R_H_INPUT].getVoltage();
-			gs_voltage = inputs[G_S_INPUT].getVoltage();
-			bv_voltage = inputs[B_V_INPUT].getVoltage();
-		}
-		int rh = int(clamp((rh_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
-		int gs = int(clamp((gs_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
-		int bv = int(clamp((bv_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+		// write pixel only if it's onscreen
+		if (x >= 0 && x < width && y >= 0 && y < height) {
+			float rh_voltage = 0;
+			float gs_voltage = 0;
+			float bv_voltage = 0;
+			if (inputs[COLOUR_POLY_INPUT].isConnected()) {
+				rh_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(0);
+				gs_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(1);
+				bv_voltage = inputs[COLOUR_POLY_INPUT].getPolyVoltage(2);
+			} else {
+				rh_voltage = inputs[R_H_INPUT].getVoltage();
+				gs_voltage = inputs[G_S_INPUT].getVoltage();
+				bv_voltage = inputs[B_V_INPUT].getVoltage();
+			}
+			int rh = int(clamp((rh_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+			int gs = int(clamp((gs_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+			int bv = int(clamp((bv_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
 
-		int offset = 4 * (x + (y * height));
-		if (params[RGB_HSV_PARAM].getValue() == 0) {
-			screen_data[offset] = rh;
-			screen_data[offset+1] = gs;
-			screen_data[offset+2] = bv;
-		} else {
-			std::vector<int> rgb = hsv_to_rgb(rh, gs, bv);
-			screen_data[offset] = rgb[0];
-			screen_data[offset+1] = rgb[1];
-			screen_data[offset+2] = rgb[2];
+			int offset = 4 * (x + (y * height));
+			if (params[RGB_HSV_PARAM].getValue() == 0) {
+				screen_data[offset] = rh;
+				screen_data[offset+1] = gs;
+				screen_data[offset+2] = bv;
+			} else {
+				std::vector<int> rgb = hsv_to_rgb(rh, gs, bv);
+				screen_data[offset] = rgb[0];
+				screen_data[offset+1] = rgb[1];
+				screen_data[offset+2] = rgb[2];
+			}
 		}
 
 		if (params[CLEAR_PARAM].getValue() == 1) {

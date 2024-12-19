@@ -1,7 +1,8 @@
 #include "plugin.hpp"
 
+float lerp_at(float a, float b, float c);
 
-float lerp(float a, float b, float t);
+#define PI 3.14159265358979323846
 
 struct AffineTransform : Module {
 	enum ParamId {
@@ -52,11 +53,11 @@ struct AffineTransform : Module {
 		configParam(TRANSLATE_X_MOD_PARAM, 0.f, 1.f, 0.f, "Translate X modulation");
 		configParam(SCALE_X_MOD_PARAM, 0.f, 1.f, 0.f, "Scale X modulation");
 		configParam(TRANSLATE_X_PARAM, -1.f, 1.f, 0.f, "Translate X");
-		configParam(SCALE_X_PARAM, -1.f, 1.f, 0.f, "Scale X");
+		configParam(SCALE_X_PARAM, 0.f, 2.f, 1.f, "Scale X");
 		configParam(TRANSLATE_Y_MOD_PARAM, 0.f, 1.f, 0.f, "Translate Y modulation");
 		configParam(SCALE_Y_MOD_PARAM, 0.f, 1.f, 0.f, "Scale Y modulation");
 		configParam(TRANSLATE_Y_PARAM, -1.f, 1.f, 0.f, "Translate Y");
-		configParam(SCALE_Y_PARAM, -1.f, 1.f, 0.f, "Scale Y");
+		configParam(SCALE_Y_PARAM, 0.f, 2.f, 1.f, "Scale Y");
 		configParam(SKEW_X_MOD_PARAM, 0.f, 1.f, 0.f, "Skew X modulation");
 		configParam(SKEW_X_PARAM, -1.f, 1.f, 0.f, "Skew X");
 		configParam(ROTATE_MOD_PARAM, 0.f, 1.f, 0.f, "Rotate modulation");
@@ -92,11 +93,61 @@ struct AffineTransform : Module {
 			y = inputs[IN_Y_INPUT].getVoltage();
 		}
 
+		// TRANSLATE
+		float translate_x_input = 0;
+		float translate_y_input = 0;
+		if (inputs[TRANSLATE_VECTOR_INPUT].isConnected()) {
+			translate_x_input = inputs[TRANSLATE_VECTOR_INPUT].getPolyVoltage(0);
+			translate_y_input = inputs[TRANSLATE_VECTOR_INPUT].getPolyVoltage(1);
+		} else {
+			translate_x_input = inputs[TRANSLATE_X_INPUT].getVoltage();
+			translate_y_input = inputs[TRANSLATE_Y_INPUT].getVoltage();
+		}
+
+		float translate_x = lerp_at(params[TRANSLATE_X_PARAM].getValue()*5, translate_x_input, params[TRANSLATE_X_MOD_PARAM].getValue());
+		float translate_y = lerp_at(params[TRANSLATE_Y_PARAM].getValue()*5, translate_y_input, params[TRANSLATE_Y_MOD_PARAM].getValue());
+		x += translate_x;
+		y += translate_y;
+
 		// SCALE
-		float scale_factor_x = lerp(params[SCALE_X_PARAM].getValue() * 5, inputs[SCALE_X_INPUT].getVoltage(), params[SCALE_X_MOD_PARAM].getValue());
-		float scale_factor_y = lerp(params[SCALE_Y_PARAM].getValue() * 5, inputs[SCALE_Y_INPUT].getVoltage(), params[SCALE_Y_MOD_PARAM].getValue());
+		float scale_x_input = 0;
+		float scale_y_input = 0;
+		if (inputs[SCALE_VECTOR_INPUT].isConnected()) {
+			scale_x_input = inputs[SCALE_VECTOR_INPUT].getPolyVoltage(0);
+			scale_y_input = inputs[SCALE_VECTOR_INPUT].getPolyVoltage(1);
+		} else {
+			scale_x_input = inputs[SCALE_X_INPUT].getVoltage();
+			scale_y_input = inputs[SCALE_Y_INPUT].getVoltage();
+		}
+
+		float scale_factor_x = lerp_at(params[SCALE_X_PARAM].getValue()*5, scale_x_input, params[SCALE_X_MOD_PARAM].getValue()) / 5;
+		float scale_factor_y = lerp_at(params[SCALE_Y_PARAM].getValue()*5, scale_y_input, params[SCALE_Y_MOD_PARAM].getValue()) / 5;
 		x *= scale_factor_x;
 		y *= scale_factor_y;
+
+		// SKEW
+		float skew_x_input = 0;
+		float skew_y_input = 0;
+		if (inputs[SKEW_VECTOR_INPUT].isConnected()) {
+			skew_x_input = inputs[SKEW_VECTOR_INPUT].getPolyVoltage(0);
+			skew_y_input = inputs[SKEW_VECTOR_INPUT].getPolyVoltage(1);
+		} else {
+			skew_x_input = inputs[SKEW_X_INPUT].getVoltage();
+			skew_y_input = inputs[SKEW_Y_INPUT].getVoltage();
+		}
+
+		float skew_factor_x = lerp_at(params[SKEW_X_PARAM].getValue()*5, skew_x_input, params[SKEW_X_MOD_PARAM].getValue()) / 5;
+		float skew_factor_y = lerp_at(params[SKEW_Y_PARAM].getValue()*5, skew_y_input, params[SKEW_Y_MOD_PARAM].getValue()) / 5;
+		x += skew_factor_x * y;
+		y += skew_factor_y * x;
+
+		// ROTATE
+		float rotation = lerp_at(params[ROTATE_PARAM].getValue()*5, inputs[ROTATE_INPUT].getVoltage(), params[ROTATE_MOD_PARAM].getValue()) / 5;
+		float r = std::sqrt((x*x)+(y*y));
+		float theta = std::atan2(x,y);
+		x = r * std::sin(theta + (2 * PI *rotation));
+		y = r * std::cos(theta + (2 * PI *rotation));
+
 
 		outputs[OUT_X_OUTPUT].setVoltage(x);
 		outputs[OUT_Y_OUTPUT].setVoltage(y);
@@ -106,20 +157,10 @@ struct AffineTransform : Module {
 	}
 };
 
-float mod(float a, float b) {
-        while (a > b) {
-                a -= b;
-        }
-        while (a < 0) {
-                a += b;
-        }
-        return a;
-}
 
-float lerp(float a, float b, float t) {
+float lerp_at(float a, float b, float t) { // as opposed to lerp_cf in CoordinateFolder.cpp - genuinely appalling hack to avoid multiple definitions
         return (a * (1.0 - t)) + (b * t);
 }
-
 
 struct AffineTransformWidget : ModuleWidget {
 	AffineTransformWidget(AffineTransform* module) {
