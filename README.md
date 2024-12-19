@@ -4,9 +4,9 @@ Visions is a VCV Rack 2 plugin for video synthesis.
 
 ![the Vision modules in use](images/visions_demo.png)
 
-## Modules
+# Modules
 
-### VideoOut
+## VideoOut
 
 The VideoOut module draws sound data on the screen. In each (audio) frame it draws a pixel with a given position and colour. This can be used like a scope, or by setting up the position input to scan across the whole image.
 
@@ -16,9 +16,9 @@ The VideoOut module draws sound data on the screen. In each (audio) frame it dra
 | X | -5v to 5v | X-position to draw a pixel at. If the polyphonic position input is connected this will be ignored in favour of the X value from that. |
 | Y | -5v to 5v | Y-position to draw a pixel at. If the polyphonic position input is connected this will be ignored in favour of the Y value from that. |
 | Colour | three-channel -5v to 5v | Three-channel polyphonic input for the colour to draw. The three channels are red, green and blue or hue, saturation and value depending on the RGB/HSV control switch. If this is connected it overrides the individual colour channel inputs. |
-| R/H | -5v to 5v | Red or hue for to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the R/H value from that. |
-| G/S | -5v to 5v | Green or saturation for to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the G/S value from that. |
-| B/V | -5b to 5v | Blue or value for to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the B/V value from that. |
+| R/H | -5v to 5v | Red or hue to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the R/H value from that. |
+| G/S | -5v to 5v | Green or saturation to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the G/S value from that. |
+| B/V | -5b to 5v | Blue or value to draw, depending on the RGB/HSV control switch. If the polyphonic colour input is connected this will be ignored in favour of the B/V value from that. |
 
 | Control | Description |
 |---------|-------------|
@@ -26,7 +26,7 @@ The VideoOut module draws sound data on the screen. In each (audio) frame it dra
 | Clear | Button to clear the screen. |
 | Resolution | Control the amount of pixels the screen has. The number is the side length of the screen. |
 
-### ImageIn
+## ImageIn
 
 The ImageIn module reads sound data from an image file. It generates output representing the colour of the pixel at a given position.
 
@@ -59,7 +59,7 @@ To be absolutely strictly correct, in a simple setup with just an ImageIn and a 
 |---------|-------------|
 | Mode | Four options for the path to scan over the image. Scanning: left to right, top to bottom. Boustrophedon: Alternating left to right then back again right to left, going top to bottom. Spiral: a square spiral out from the centre. Random: pick pixels at random. |
 | Speed | Speed the scanning head moves, or in the case of random mode, probability of the scanning head moving. |
-| Resolution | how many lines to scan. If plugged into a VideoOut, should be similar to the resolution of that module. |
+| Resolution | how many lines to scan. If plugged into a VideoOut, should generally be similar to the resolution of that module. |
 
 | Output | Range | Description |
 |--------|-------|-------------|
@@ -70,7 +70,7 @@ To be absolutely strictly correct, in a simple setup with just an ImageIn and a 
 
 ## CoordinateFolder
 
-The CoordinateFolder takes a position and folds it onto a subset of the plane, either square or radial. It can be used to produce tiled or kaleidoscopic effects.
+The CoordinateFolder module takes a position and folds it onto a subset of the plane, either square or radial. It can be used to produce tiled or kaleidoscopic effects.
 
 | Input | Expected Range | Description |
 |-------|----------------|-------------|
@@ -94,7 +94,7 @@ The CoordinateFolder takes a position and folds it onto a subset of the plane, e
 
 ## AffineTransform
 
-Fully voltage-controllable affine transform on 2d vectors. Applies operations in the order they appear on the panel: translate, scale, skew, rotate.
+The AffineTransform module is a fully voltage-controllable affine transform on 2d vectors. Applies operations in the order they appear on the panel: translate, scale, skew, rotate.
 
 | Input | Expected Range | Description |
 |-------|----------------|-------------|

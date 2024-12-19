@@ -8,7 +8,7 @@
   "authorEmail": "",
   "authorUrl": "",
   "pluginUrl": "",
-  "manualUrl": "",
+  "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#visions",
   "sourceUrl": "https://github.com/silver-ag/visions",
   "donateUrl": "",
   "changelogUrl": "",
@@ -36,6 +36,7 @@
       "name": "PathGenerator",
       "description": "oscillator for generating position inputs for videosynth modules",
       "tags": [
+	"visual",
         "polyphonic"
       ]
     },
