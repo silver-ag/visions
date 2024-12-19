@@ -15,7 +15,7 @@
   "changelogUrl": "",
   "modules": [
     {
-      "slug": "visions-VideoOut",
+      "slug": "VideoOut",
       "name": "VideoOut",
       "description": "video synth output",
       "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#videoout",
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "slug": "visions-ImageIn",
+      "slug": "ImageIn",
       "name": "ImageIn",
       "description": "read from an image file as sound data",
       "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#imagein",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "slug": "visions-PathGenerator",
+      "slug": "PathGenerator",
       "name": "PathGenerator",
       "description": "oscillator for generating position inputs for videosynth modules",
       "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#pathgenerator",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "slug": "visions-CoordinateFolder",
+      "slug": "CoordinateFolder",
       "name": "CoordinateFolder",
       "description": "fold a 2d vector onto a subset of the plane",
       "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#coordinatefolder",
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "slug": "visions-AffineTransform",
+      "slug": "AffineTransform",
       "name": "AffineTransform",
       "description": "apply cv-controllable affine transforms to 2d vectors",
       "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#affinetransform",
