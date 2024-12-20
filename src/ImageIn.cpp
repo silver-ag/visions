@@ -53,6 +53,7 @@ struct ImageIn : Module {
 		if (params[LOAD_PARAM].getValue() == 1) {
 			get_filename();
 		}
+
 		float x_voltage = 0;
                 float y_voltage = 0;
                 if (inputs[POSITION_INPUT].isConnected()) {
@@ -95,7 +96,7 @@ struct ImageIn : Module {
 	}
 
 	void get_filename() {
-		filename = osdialog_file(OSDIALOG_OPEN, "", "", 0);
+		filename = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
 		if (filename) {
 			load_file(filename);
 		}
