@@ -46,7 +46,7 @@ struct CoordinateFolder : Module {
 
 	void process(const ProcessArgs& args) override {
 		float amount = params[AMOUNT_PARAM].getValue();
-		amount = lerp_cf(amount, inputs[AMOUNT_INPUT].getVoltage()+1, params[AMOUNT_MOD_PARAM].getValue());
+		amount = std::abs(lerp_cf(amount, inputs[AMOUNT_INPUT].getVoltage()+1, params[AMOUNT_MOD_PARAM].getValue()));
 		float x_in = 0;
 		float y_in = 0;
 		float x_out = 0;
