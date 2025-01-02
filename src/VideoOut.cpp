@@ -60,8 +60,8 @@ struct VideoOut : Module {
 			x_voltage = inputs[X_INPUT].getVoltage();
 			y_voltage = inputs[Y_INPUT].getVoltage();
 		}
-		int x = int(((x_voltage / 10) + 0.5f) * width);
-		int y = int(((y_voltage / 10) + 0.5f) * height);
+		int x = (int) (std::round((((x_voltage / 10) + 0.5f) * width)));
+		int y = (int) (std::round((((y_voltage / 10) + 0.5f) * height)));
 
 		// write pixel only if it's onscreen
 		if (x >= 0 && x < width && y >= 0 && y < height) {
