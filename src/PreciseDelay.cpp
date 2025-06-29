@@ -1,7 +1,5 @@
 #include "plugin.hpp"
 
-// TODO: polyphony
-
 struct PreciseDelay : Module {
 	enum ParamId {
 		DELAY_1_PARAM,
@@ -100,6 +98,13 @@ struct PreciseDelay : Module {
 			outputs[OUTPUT_5_OUTPUT].setVoltage(delay_line_e[(write_pointer_e + 33 - int(params[DELAY_5_PARAM].getValue())) % 32][c], c);
 			outputs[OUTPUT_6_OUTPUT].setVoltage(delay_line_f[(write_pointer_f + 33 - int(params[DELAY_6_PARAM].getValue())) % 32][c], c);
 		}
+
+		outputs[OUTPUT_1_OUTPUT].setChannels(inputs[INPUT_1_INPUT].getChannels());
+		outputs[OUTPUT_2_OUTPUT].setChannels(inputs[INPUT_2_INPUT].getChannels());
+		outputs[OUTPUT_3_OUTPUT].setChannels(inputs[INPUT_3_INPUT].getChannels());
+		outputs[OUTPUT_4_OUTPUT].setChannels(inputs[INPUT_4_INPUT].getChannels());
+		outputs[OUTPUT_5_OUTPUT].setChannels(inputs[INPUT_5_INPUT].getChannels());
+		outputs[OUTPUT_6_OUTPUT].setChannels(inputs[INPUT_6_INPUT].getChannels());
 
 	}
 };

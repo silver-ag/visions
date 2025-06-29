@@ -172,7 +172,7 @@ struct ImageDisplay : TransparentWidget {
 				nvgFill(vg);
 				nvgBeginPath(vg);
 				nvgScale(vg, module->width/real_width, module->height/real_height); // back to unscaled
-				nvgCircle(vg, module->x * real_width/module->width, module->y * real_height/module->height, 5);
+				nvgCircle(vg, module->x * real_width/module->width, module->y * real_height/module->height, 4);
 				nvgFillColor(vg, nvgRGBA(255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x)],
 							 255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x) + 1],
 							 255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x) + 2],
