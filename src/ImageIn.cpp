@@ -9,6 +9,8 @@ float fold_into_range(float n, float a, float b);
 struct ImageIn : Module {
 	enum ParamId {
 		RGB_HSV_PARAM,
+		COLOUR_POLARITY_PARAM,
+		XY_POLARITY_PARAM,
 		LOAD_PARAM,
 		PARAMS_LEN
 	};
@@ -38,6 +40,8 @@ struct ImageIn : Module {
 	ImageIn() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configSwitch(RGB_HSV_PARAM, 0.f, 1.f, 0.f, "RGB or HSV", {"RGB", "HSV"});
+		configSwitch(COLOUR_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Colour", {"Bipolar", "Unipolar"});
+		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
 		configButton(LOAD_PARAM, "Load");
 		configInput(POSITION_INPUT, "Polyphonic position");
 		configOutput(COLOUR_OUTPUT, "Polyphonic Colour");
@@ -63,8 +67,15 @@ struct ImageIn : Module {
                         x_voltage = inputs[X_INPUT].getVoltage();
                         y_voltage = inputs[Y_INPUT].getVoltage();
                 }
-                int x = int(((fold_into_range(x_voltage,-5,5) / 10) + 0.5f) * width);
-                int y = int(((fold_into_range(y_voltage,-5,5) / 10) + 0.5f) * height);
+		int x = 0;
+		int y = 0;
+		if (params[XY_POLARITY_PARAM].getValue() == 0) {
+	                x = int(((fold_into_range(x_voltage,-5,5) / 10) + 0.5) * width);
+        	        y = int(((fold_into_range(y_voltage,-5,5) / 10) + 0.5) * height);
+		} else {
+	                x = int((fold_into_range(x_voltage,0,10) / 10) * width);
+        	        y = int((fold_into_range(y_voltage,0,10) / 10) * height);
+		}
 
 		if (image > 0) {
 
@@ -73,16 +84,20 @@ struct ImageIn : Module {
 			float gs_voltage = 0;
 			float bv_voltage = 0;
 			if (params[RGB_HSV_PARAM].getValue() == 0) {
-				rh_voltage = (10 * (float(image_data[offset]) / 256)) - 5;
-				gs_voltage = (10 * (float(image_data[offset+1]) / 256)) - 5;
-				bv_voltage = (10 * (float(image_data[offset+2]) / 256)) - 5;
+				rh_voltage = 10 * (float(image_data[offset]) / 256);
+				gs_voltage = 10 * (float(image_data[offset+1]) / 256);
+				bv_voltage = 10 * (float(image_data[offset+2]) / 256);
 			} else {
 				std::vector<int> hsv = rgb_to_hsv(image_data[offset], image_data[offset+1], image_data[offset+2]);
-				rh_voltage = (10 * (float(hsv[0]) / 256)) - 5;
-                                gs_voltage = (10 * (float(hsv[1]) / 256)) - 5;
-                                bv_voltage = (10 * (float(hsv[2]) / 256)) - 5;
+				rh_voltage = 10 * (float(hsv[0]) / 256);
+                                gs_voltage = 10 * (float(hsv[1]) / 256);
+                                bv_voltage = 10 * (float(hsv[2]) / 256);
 			}
-
+			if (params[COLOUR_POLARITY_PARAM].getValue() == 0) {
+				rh_voltage -= 5;
+				gs_voltage -= 5;
+				bv_voltage -= 5;
+			}
 			outputs[R_H_OUTPUT].setVoltage(rh_voltage);
 			outputs[G_S_OUTPUT].setVoltage(gs_voltage);
 			outputs[B_V_OUTPUT].setVoltage(bv_voltage);
@@ -194,6 +209,8 @@ struct ImageInWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addChild(createParam<HorizontalSwitch>(mm2px(Vec(135, 50)), module, ImageIn::RGB_HSV_PARAM));
+		addChild(createParam<HorizontalSwitch>(mm2px(Vec(135, 57)), module, ImageIn::COLOUR_POLARITY_PARAM));
+		addChild(createParam<HorizontalSwitch>(mm2px(Vec(8, 42)), module, ImageIn::XY_POLARITY_PARAM));
 		addChild(createParam<VCVButton>(mm2px(Vec(6.5, 69)), module, ImageIn::LOAD_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.957, 14.232)), module, ImageIn::POSITION_INPUT));
