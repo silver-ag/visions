@@ -7,6 +7,8 @@ std::vector<int> hsv_to_rgb(int h, int s, int v);
 struct VideoOut : Module {
 	enum ParamId {
 		RGB_HSV_PARAM,
+		COLOUR_POLARITY_PARAM,
+		XY_POLARITY_PARAM,
 		CLEAR_PARAM,
 		RESOLUTION_PARAM,
 		PARAMS_LEN
@@ -38,6 +40,8 @@ struct VideoOut : Module {
 	VideoOut() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configSwitch(RGB_HSV_PARAM, 0.f, 1.f, 0.f, "RGB or HSV", {"RGB", "HSV"});
+		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
+		configSwitch(COLOUR_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Colour", {"Bipolar", "Unipolar"});
 		configButton(CLEAR_PARAM, "Clear");
 		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
@@ -60,8 +64,15 @@ struct VideoOut : Module {
 			x_voltage = inputs[X_INPUT].getVoltage();
 			y_voltage = inputs[Y_INPUT].getVoltage();
 		}
-		int x = (int) (std::round((((x_voltage / 10) + 0.5f) * width)));
-		int y = (int) (std::round((((y_voltage / 10) + 0.5f) * height)));
+		int x = 0;
+		int y = 0;
+		if (params[XY_POLARITY_PARAM].getValue() == 0) {
+			x = (int) (std::round((((x_voltage / 10) + 0.5f) * width)));
+			y = (int) (std::round((((y_voltage / 10) + 0.5f) * height)));
+		} else {
+			x = (int) (std::round((((x_voltage / 10)) * width)));
+			y = (int) (std::round((((y_voltage / 10)) * height)));
+		}
 
 		// write pixel only if it's onscreen
 		if (x >= 0 && x < width && y >= 0 && y < height) {
@@ -77,9 +88,18 @@ struct VideoOut : Module {
 				gs_voltage = inputs[G_S_INPUT].getVoltage();
 				bv_voltage = inputs[B_V_INPUT].getVoltage();
 			}
-			int rh = int(clamp((rh_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
-			int gs = int(clamp((gs_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
-			int bv = int(clamp((bv_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+			int rh = 0;
+			int gs = 0;
+			int bv = 0;
+			if (params[COLOUR_POLARITY_PARAM].getValue() == 0) {
+				rh = int(clamp((rh_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+				gs = int(clamp((gs_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+				bv = int(clamp((bv_voltage / 10) + 0.5f, 0.0, 0.999) * 256);
+			} else {
+				rh = int(clamp((rh_voltage / 10), 0.0, 0.999) * 256);
+				gs = int(clamp((gs_voltage / 10), 0.0, 0.999) * 256);
+				bv = int(clamp((bv_voltage / 10), 0.0, 0.999) * 256);
+			}
 
 			int offset = 4 * (x + (y * height));
 			if (params[RGB_HSV_PARAM].getValue() == 0) {
@@ -168,6 +188,8 @@ struct VideoOutWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 85)), module, VideoOut::RGB_HSV_PARAM));
+		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 92)), module, VideoOut::COLOUR_POLARITY_PARAM));
+		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 38)), module, VideoOut::XY_POLARITY_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 12)), module, VideoOut::XY_POLY_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 23.5)), module, VideoOut::X_INPUT));

@@ -134,7 +134,6 @@ struct ImageDisplay : TransparentWidget {
 		if (module && (layer == 1)) {
 			if (module->image == -1) {
 				module->image = nvgCreateImageRGBA(vg, module->width, module->height, 0, module->image_data);
-				//module->image = nvgCreateImage(vg, module->filename, 0);
 			}
 			if (module->image > 0) { // image can be 0 as well as -1
 				NVGpaint paint = nvgImagePattern(vg, 0, 0, module->width, module->height, 0, module->image, 1);
@@ -191,7 +190,7 @@ std::vector<int> rgb_to_hsv(int r_in, int g_in, int b_in)
     // compute v 
     float v = cmax * 100; 
 
-	return std::vector<int>({int(h),int(3*s),int(3*v)}); // i don't know why these *3s are needed, but they get the output much closer to correct
+	return std::vector<int>({int(h),int(s),int(v)}); // i don't know why these *3s are needed, but they get the output much closer to correct
 } 
   
 
