@@ -2,6 +2,7 @@
 #include "osdialog.h"
 #include "widgets/switches.hpp"
 #include "stb_image.h"
+#include "stb_image_write.h"
 
 std::vector<int> rgb_to_hsv(int r, int g, int b);
 float fold_into_range(float n, float a, float b);
@@ -35,7 +36,9 @@ struct ImageIn : Module {
 	int width = 0;
 	int height = 0;
 	int image = 0;
-	const char* filename {};
+	char* filename = "test";
+	int x = 0;
+	int y = 0;
 
 	ImageIn() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -59,7 +62,7 @@ struct ImageIn : Module {
 		}
 
 		float x_voltage = 0;
-                float y_voltage = 0;
+		float y_voltage = 0;
                 if (inputs[POSITION_INPUT].isConnected()) {
                         x_voltage = inputs[POSITION_INPUT].getPolyVoltage(0);
                         y_voltage = inputs[POSITION_INPUT].getPolyVoltage(1);
@@ -67,8 +70,6 @@ struct ImageIn : Module {
                         x_voltage = inputs[X_INPUT].getVoltage();
                         y_voltage = inputs[Y_INPUT].getVoltage();
                 }
-		int x = 0;
-		int y = 0;
 		if (params[XY_POLARITY_PARAM].getValue() == 0) {
 	                x = int(((fold_into_range(x_voltage,-5,5) / 10) + 0.5) * width);
         	        y = int(((fold_into_range(y_voltage,-5,5) / 10) + 0.5) * height);
@@ -117,26 +118,22 @@ struct ImageIn : Module {
 		}
 	}
 
-	void load_file(const char* filename) {
-		if (FILE *file = fopen(filename, "r")) {
+	void load_file(char* fn) {
+		if (FILE *file = fopen(fn, "r")) {
 			int channels = 0;
-			image_data = stbi_load(filename, &width, &height, &channels, 4);
+			image_data = stbi_load(fn, &width, &height, &channels, 4);
 			image = -1;
 		}
 	}
 
-	json_t* dataToJson() override {
-		json_t* rootJ = json_object();
-		json_object_set_new(rootJ, "filename", json_string(filename));
-		return rootJ;
+	void onAdd(const AddEvent& e) override {
+		std::string path = system::join(getPatchStorageDirectory(), "image.png");
+		load_file((char*)path.c_str());
 	}
 
-	void dataFromJson(json_t* rootJ) override {
-		json_t* filenameJ = json_object_get(rootJ, "filename");
-		if (filenameJ) {
-			filename = json_string_value(filenameJ);
-			load_file(filename);
-		}
+	void onSave(const SaveEvent& e) override {
+		std::string path = system::join(createPatchStorageDirectory(), "image.png");
+		stbi_write_png(path.c_str(), width, height, 4, image_data, width * 4); // 4 is the amount of channels (inc. alpha)
 	}
 };
 
@@ -171,10 +168,18 @@ struct ImageDisplay : TransparentWidget {
 				nvgBeginPath(vg);
 				nvgScale(vg, real_width/module->width, real_height/module->height);
 				nvgRect(vg, 0, 0, module->width, module->height);
-
 				nvgFillPaint(vg, paint);
 				nvgFill(vg);
+				nvgBeginPath(vg);
+				nvgScale(vg, module->width/real_width, module->height/real_height); // back to unscaled
+				nvgCircle(vg, module->x * real_width/module->width, module->y * real_height/module->height, 5);
+				nvgFillColor(vg, nvgRGBA(255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x)],
+							 255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x) + 1],
+							 255 - module->image_data[((4 * module->width) * module->y) + (4 * module->x) + 2],
+							 255));
+				nvgFill(vg);
 			}
+			nvgClosePath(vg);
 		}
 	}
 };

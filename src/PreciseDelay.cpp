@@ -1,5 +1,6 @@
 #include "plugin.hpp"
 
+// TODO: polyphony
 
 struct PreciseDelay : Module {
 	enum ParamId {
