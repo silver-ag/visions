@@ -30,7 +30,7 @@ struct VideoOut : Module {
 		LIGHTS_LEN
 	};
 
-	unsigned char screen_data[160000] = {};
+	unsigned char screen_data[4000000] = {};
 	int width = 100;
 	int height = 100;
 
@@ -43,7 +43,7 @@ struct VideoOut : Module {
 		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
 		configSwitch(COLOUR_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Colour", {"Bipolar", "Unipolar"});
 		configButton(CLEAR_PARAM, "Clear");
-		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
+		configParam(RESOLUTION_PARAM, 1, 1000, 150, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
 		configInput(XY_POLY_INPUT, "Polyphonic XY");
 		configInput(X_INPUT, "X coordinate");

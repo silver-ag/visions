@@ -32,7 +32,7 @@ struct PathGenerator : Module {
 		configSwitch(MODE_PARAM, 0.f, 3.f, 0.f, "Mode", {"Scanning", "Boustrophedon", "Spiral", "Random"});
 		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
 		configParam(SPEED_PARAM, 0, 1, 1, "Speed");
-		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
+		configParam(RESOLUTION_PARAM, 1, 1000, 150, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
 		configOutput(POSITION_OUTPUT, "Polyphonic position");
 		configOutput(X_OUTPUT, "X position");
