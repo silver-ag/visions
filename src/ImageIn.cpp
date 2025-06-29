@@ -149,50 +149,39 @@ struct ImageDisplay : TransparentWidget {
 };
 
 
-std::vector<int> rgb_to_hsv(int r_in, int g_in, int b_in) 
-{ 
-  
-    // R, G, B values are divided by 255 
-    // to change the range from 0..255 to 0..1 
-    float r = r_in / 255.0; 
-    float g = g_in / 255.0; 
-    float b = b_in / 255.0; 
+std::vector<int> rgb_to_hsv(int r_in, int g_in, int b_in) {
+	float r = r_in / 255.0;
+	float g = g_in / 255.0;
+	float b = b_in / 255.0;
 
-  
-    // h, s, v = hue, saturation, value 
-    float cmax = std::max(r, std::max(g, b)); // maximum of r, g, b 
-    float cmin = std::min(r, std::min(g, b)); // minimum of r, g, b 
-    float diff = cmax - cmin; // diff of cmax and cmin. 
-    float h = -1, s = -1; 
-  
-    // if cmax and cmax are equal then h = 0 
-    if (cmax == cmin) 
-        h = 0; 
-  
-    // if cmax equal r then compute h 
-    else if (cmax == r) 
-        h = fmod(60 * ((g - b) / diff) + 360, 360); 
-  
-    // if cmax equal g then compute h 
-    else if (cmax == g) 
-        h = fmod(60 * ((b - r) / diff) + 120, 360); 
-  
-    // if cmax equal b then compute h 
-    else if (cmax == b) 
-        h = fmod(60 * ((r - g) / diff) + 240, 360); 
-  
-    // if cmax equal zero 
-    if (cmax == 0) 
-        s = 0; 
-    else
-        s = (diff / cmax) * 100; 
-  
-    // compute v 
-    float v = cmax * 100; 
+	float h = 0;
+	float s = 0;
+	float v = 0;
 
-	return std::vector<int>({int(h),int(s),int(v)}); // i don't know why these *3s are needed, but they get the output much closer to correct
-} 
-  
+	float top = std::max(r,std::max(g,b));
+	float bottom = std::min(r,std::min(g,b));
+	float difference = top - bottom;
+
+	if (difference == 0) {
+		h = 0;
+	} else if (r == top) {
+		h = fmod((((1.0/6.0)*((g-b)/difference))+1.0), 1.0);
+	} else if (g == top) {
+		h = fmod((((1.0/6.0)*((b-r)/difference))+(1.0/3.0)), 1.0);
+	} else { // b == top
+		h = fmod((((1.0/6.0)*((r-g)/difference))+(2.0/3.0)), 1.0);
+	}
+
+	if (top == 0) {
+		s = 0;
+	} else {
+		s = difference / top;
+	}
+
+	v = top;
+
+	return std::vector<int>({int(h*256),int(s*256),int(v*256)});
+}
 
 struct ImageInWidget : ModuleWidget {
 	ImageInWidget(ImageIn* module) {
