@@ -15,3 +15,4 @@ extern Model* modelImageIn;
 extern Model* modelPathGenerator;
 extern Model* modelCoordinateFolder;
 extern Model* modelAffineTransform;
+extern Model* modelPreciseDelay;
