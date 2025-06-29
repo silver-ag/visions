@@ -35,7 +35,7 @@ struct ImageIn : Module {
 	int width = 0;
 	int height = 0;
 	int image = 0;
-	char* filename {};
+	const char* filename {};
 
 	ImageIn() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -117,10 +117,26 @@ struct ImageIn : Module {
 		}
 	}
 
-	void load_file(char* filename) {
-		int channels = 0;
-		image_data = stbi_load(filename, &width, &height, &channels, 4);
-		image = -1;
+	void load_file(const char* filename) {
+		if (FILE *file = fopen(filename, "r")) {
+			int channels = 0;
+			image_data = stbi_load(filename, &width, &height, &channels, 4);
+			image = -1;
+		}
+	}
+
+	json_t* dataToJson() override {
+		json_t* rootJ = json_object();
+		json_object_set_new(rootJ, "filename", json_string(filename));
+		return rootJ;
+	}
+
+	void dataFromJson(json_t* rootJ) override {
+		json_t* filenameJ = json_object_get(rootJ, "filename");
+		if (filenameJ) {
+			filename = json_string_value(filenameJ);
+			load_file(filename);
+		}
 	}
 };
 
