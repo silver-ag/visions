@@ -209,8 +209,8 @@ struct ImageInWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addChild(createParam<HorizontalSwitch>(mm2px(Vec(135, 50)), module, ImageIn::RGB_HSV_PARAM));
-		addChild(createParam<HorizontalSwitch>(mm2px(Vec(135, 57)), module, ImageIn::COLOUR_POLARITY_PARAM));
-		addChild(createParam<HorizontalSwitch>(mm2px(Vec(8, 42)), module, ImageIn::XY_POLARITY_PARAM));
+		addChild(createParam<PolaritySwitch>(mm2px(Vec(135, 57)), module, ImageIn::COLOUR_POLARITY_PARAM));
+		addChild(createParam<PolaritySwitch>(mm2px(Vec(8, 42)), module, ImageIn::XY_POLARITY_PARAM));
 		addChild(createParam<VCVButton>(mm2px(Vec(6.5, 69)), module, ImageIn::LOAD_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.957, 14.232)), module, ImageIn::POSITION_INPUT));

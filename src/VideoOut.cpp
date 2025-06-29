@@ -188,8 +188,8 @@ struct VideoOutWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
 
 		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 85)), module, VideoOut::RGB_HSV_PARAM));
-		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 92)), module, VideoOut::COLOUR_POLARITY_PARAM));
-		addParam(createParam<HorizontalSwitch>(mm2px(Vec(12, 38)), module, VideoOut::XY_POLARITY_PARAM));
+		addParam(createParam<PolaritySwitch>(mm2px(Vec(12, 92)), module, VideoOut::COLOUR_POLARITY_PARAM));
+		addParam(createParam<PolaritySwitch>(mm2px(Vec(12, 38)), module, VideoOut::XY_POLARITY_PARAM));
 
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 12)), module, VideoOut::XY_POLY_INPUT));
 		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(6.7, 23.5)), module, VideoOut::X_INPUT));

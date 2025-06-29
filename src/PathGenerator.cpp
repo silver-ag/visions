@@ -1,10 +1,12 @@
 #include "plugin.hpp"
+#include "widgets/switches.hpp"
 
 struct PathGenerator : Module {
 	enum ParamId {
 		MODE_PARAM,
 		SPEED_PARAM,
 		RESOLUTION_PARAM,
+		XY_POLARITY_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
@@ -28,6 +30,7 @@ struct PathGenerator : Module {
 	PathGenerator() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configSwitch(MODE_PARAM, 0.f, 3.f, 0.f, "Mode", {"Scanning", "Boustrophedon", "Spiral", "Random"});
+		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
 		configParam(SPEED_PARAM, 0, 1, 1, "Speed");
 		configParam(RESOLUTION_PARAM, 50, 200, 100, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
@@ -101,8 +104,12 @@ struct PathGenerator : Module {
 				y_position = int(random::uniform() * res);
 			}
 		}
-		float x_voltage = (10 * float(x_position) / res) - 5;
-		float y_voltage = (10 * float(y_position) / res) - 5;
+		float x_voltage = (10 * float(x_position) / res);
+		float y_voltage = (10 * float(y_position) / res);
+		if (params[XY_POLARITY_PARAM].getValue() == 0) {
+			x_voltage -= 5;
+			y_voltage -= 5;
+		}
 		outputs[X_OUTPUT].setVoltage(x_voltage);
 		outputs[Y_OUTPUT].setVoltage(y_voltage);
 		outputs[POSITION_OUTPUT].setVoltage(x_voltage, 0);
@@ -124,6 +131,7 @@ struct PathGeneratorWidget : ModuleWidget {
 		addChild(createParam<RoundBlackKnob>(mm2px(Vec(5.5, 15)), module, PathGenerator::MODE_PARAM));
 		addChild(createParam<RoundBlackKnob>(mm2px(Vec(5.5, 34)), module, PathGenerator::SPEED_PARAM));
 		addChild(createParam<Trimpot>(mm2px(Vec(7, 53)), module, PathGenerator::RESOLUTION_PARAM));
+		addChild(createParam<PolaritySwitch>(mm2px(Vec(5.5, 107)), module, PathGenerator::XY_POLARITY_PARAM));
 
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(8.5, 79.5)), module, PathGenerator::POSITION_OUTPUT));
 		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(8.5, 91)), module, PathGenerator::X_OUTPUT));
