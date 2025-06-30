@@ -67,7 +67,9 @@
       "slug": "PreciseDelay",
       "name": "PreciseDelay",
       "description": "frame-level delay, it doesn't get more precise than that",
+      "manualUrl": "https://github.com/silver-ag/visions/tree/main?tab=readme-ov-file#precisedelay",
       "tags": [
+        "delay",
         "polyphonic"
       ]
     }
