@@ -78,10 +78,18 @@ struct ImageIn : Module {
 	                x = int((fold_into_range(x_voltage,0,10) / 10) * width);
         	        y = int((fold_into_range(y_voltage,0,10) / 10) * height);
 		}
+		if (x == width) { // just checking for this case seems like the easiest way tbh
+			x = width - 1;
+		}
+		if (y == height) {
+			y = height - 1;
+		}
+		//printf("x: %d, y: %d, xv: %f, yv: %f\n", x, y, x_voltage, y_voltage);
 
 		if (image > 0) {
 
 			int offset = ((4 * width) * y) + (4 * x);
+			printf("(%d/%d,%d/%d -> %d/%d)\n",x,width,y,height,offset,4*width*height);
 			float rh_voltage = 0;
 			float gs_voltage = 0;
 			float bv_voltage = 0;

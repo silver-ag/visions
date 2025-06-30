@@ -140,7 +140,6 @@ struct VideoOut : Module {
 			}
 		}
 	}
-
 };
 
 struct VideoDisplay : TransparentWidget {
@@ -169,8 +168,8 @@ struct VideoDisplay : TransparentWidget {
 			nvgFill(vg);
 		}
 	}
-};
 
+};
 
 struct VideoOutWidget : ModuleWidget {
 	VideoOut* module = nullptr;
@@ -208,6 +207,7 @@ struct VideoOutWidget : ModuleWidget {
 
 		addChild(createParam<VCVButton>(mm2px(Vec(6, 102)), module, VideoOut::CLEAR_PARAM));
 		addChild(createParam<Trimpot>(mm2px(Vec(6, 113)), module, VideoOut::RESOLUTION_PARAM));
+
 	}
 };
 
