@@ -8,7 +8,7 @@ Visions is a VCV Rack 2 plugin for video synthesis.
 
 ## VideoOut
 
-The VideoOut module draws sound data on the screen. In each (audio) frame it draws a pixel with a given position and colour. This can be used like a scope, or by setting up the position input to scan across the whole image.
+The VideoOut module draws sound data on the screen. In each (audio) frame it draws a pixel with a given position and colour. This can be used like a scope, or by setting up the position input to scan across the whole image. It can display the resulting image in a separate resizable window.
 
 | Input | Description |
 |-------|-------------|
@@ -25,6 +25,7 @@ The VideoOut module draws sound data on the screen. In each (audio) frame it dra
 | RGB or HSV | Switch determining whether to interpret the three-channel colour input as red, green, blue or hue, saturation, value. |
 | Bi/Unipolar Colour | Switch determining whether to expect -5v to 5v or 0v to 10v for colour inputs. |
 | Bi/Unipolar Position | Switch determining whether to expect -5v to 5v or 0v to 10v for position inputs. |
+| Window | Button to open a separate resizable window displaying the output. |
 | Clear | Button to clear the screen. |
 | Resolution | Control the amount of pixels the screen has. The number is the side length of the screen. |
 

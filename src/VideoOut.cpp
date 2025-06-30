@@ -1,6 +1,8 @@
 #include "plugin.hpp"
-#include "nanovg.h"
+//#include "nanovg.h"
+#include "nanovg_gl.h"
 #include "widgets/switches.hpp"
+#include "GLFW/glfw3.h"
 
 std::vector<int> hsv_to_rgb(int h, int s, int v);
 
@@ -10,6 +12,7 @@ struct VideoOut : Module {
 		COLOUR_POLARITY_PARAM,
 		XY_POLARITY_PARAM,
 		CLEAR_PARAM,
+		WINDOW_PARAM,
 		RESOLUTION_PARAM,
 		PARAMS_LEN
 	};
@@ -37,12 +40,22 @@ struct VideoOut : Module {
 	bool already_cleared = false;
 	bool resolution_changed = false;
 
+	bool glfw_initialised = false;
+	GLFWwindow *window = NULL;
+	NVGcontext *window_ctx = NULL;
+	int t = 0;
+	int window_image = -1; // shame we have to generate two images, but they live in different NVGcontexts
+	int window_width = 1;
+	int window_height = 1;
+	bool window_resolution_changed = false; // not the resolution of the window changing, but a 'resolution changed' variable for the window. need a separate one because both image recreation routines set it to false
+
 	VideoOut() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 		configSwitch(RGB_HSV_PARAM, 0.f, 1.f, 0.f, "RGB or HSV", {"RGB", "HSV"});
 		configSwitch(XY_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Position", {"Bipolar", "Unipolar"});
 		configSwitch(COLOUR_POLARITY_PARAM, 0.f, 1.f, 0.f, "Bi/Unipolar Colour", {"Bipolar", "Unipolar"});
 		configButton(CLEAR_PARAM, "Clear");
+		configButton(WINDOW_PARAM, "Window");
 		configParam(RESOLUTION_PARAM, 1, 1000, 150, "Resolution");
 		paramQuantities[RESOLUTION_PARAM]->snapEnabled = true;
 		configInput(XY_POLY_INPUT, "Polyphonic XY");
@@ -52,6 +65,7 @@ struct VideoOut : Module {
 		configInput(R_H_INPUT, "Red or Hue");
 		configInput(G_S_INPUT, "Green or Saturation");
 		configInput(B_V_INPUT, "Blue or Value");
+
 	}
 
 	void process(const ProcessArgs &args) override {
@@ -126,7 +140,50 @@ struct VideoOut : Module {
 			width = resolution;
 			height = resolution;
 			resolution_changed = true;
+			window_resolution_changed = true;
 		}
+
+		if (window == NULL && params[WINDOW_PARAM].getValue() == 1) { // put this outside the 30fps section to make the button more responsive
+			glfwDefaultWindowHints();
+			window = glfwCreateWindow(300, 300, "VideoOut", NULL, NULL);
+			if (window) {
+				glfwMakeContextCurrent(window);
+				window_ctx = nvgCreateGL2(0);
+				window_image = -1;
+				glfwSwapInterval(0);
+			}
+		}
+		t += 1;
+		if (t > args.sampleRate / 30) { // render window at ~30fps
+			t = 0;
+			if (window != NULL) {
+				if (glfwWindowShouldClose(window)) {
+					glfwDestroyWindow(window);
+					window = NULL;
+				} else {
+					if (window_ctx != NULL) {
+						glfwMakeContextCurrent(window);
+						glfwGetFramebufferSize(window, &window_width, &window_height);
+						if (window_image == -1 or window_resolution_changed) {
+							window_image = nvgCreateImageRGBA(window_ctx, width, height, 0, screen_data);
+							window_resolution_changed = false;
+						}
+                       				nvgUpdateImage(window_ctx, window_image, screen_data);
+						nvgBeginFrame(window_ctx,100,100,1.f);
+						nvgBeginPath(window_ctx);
+						NVGpaint paint = nvgImagePattern(window_ctx, 0, 0, 100, 100, 0, window_image, 1); // 100s are the screen units defined in nvgBeginFrame
+						nvgBeginPath(window_ctx);
+						nvgRect(window_ctx, 0, 0, window_width, window_height);
+						nvgFillPaint(window_ctx, paint);
+						nvgFill(window_ctx);
+						nvgEndFrame(window_ctx);
+					}
+					glViewport(0,0,window_width,window_height);
+					glfwSwapBuffers(window);
+				}
+			}
+		}
+
 	}
 
 	void clear() {
@@ -168,7 +225,6 @@ struct VideoDisplay : TransparentWidget {
 			nvgFill(vg);
 		}
 	}
-
 };
 
 struct VideoOutWidget : ModuleWidget {
@@ -205,7 +261,8 @@ struct VideoOutWidget : ModuleWidget {
 		display->real_height = mm2px(112.94);
 		addChild(display);
 
-		addChild(createParam<VCVButton>(mm2px(Vec(6, 102)), module, VideoOut::CLEAR_PARAM));
+		addChild(createParam<VCVButton>(mm2px(Vec(6, 99.5)), module, VideoOut::WINDOW_PARAM));
+		addChild(createParam<VCVButton>(mm2px(Vec(6, 106)), module, VideoOut::CLEAR_PARAM));
 		addChild(createParam<Trimpot>(mm2px(Vec(6, 113)), module, VideoOut::RESOLUTION_PARAM));
 
 	}
