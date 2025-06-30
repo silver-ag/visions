@@ -36,9 +36,10 @@ struct ImageIn : Module {
 	int width = 0;
 	int height = 0;
 	int image = 0;
-	char* filename = "test";
+	char* filename;
 	int x = 0;
 	int y = 0;
+	osdialog_filters* filename_filters = osdialog_filters_parse("Images:png,Png,PNG,jpg,Jpg,JPG,jpeg,Jpeg,JPEG,bmp,Bmp,BMP,gif,Gif,GIF,psd,Psd,PSD,hdr,Hdr,HDR,pic,Pic,PIC,pnm,Pnm,PNM"); // stbi supported filetypes (not necessarily all kinds though, sometimes just a subset)
 
 	ImageIn() {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
@@ -112,7 +113,7 @@ struct ImageIn : Module {
 	}
 
 	void get_filename() {
-		filename = osdialog_file(OSDIALOG_OPEN, NULL, NULL, NULL);
+		filename = osdialog_file(OSDIALOG_OPEN, NULL, NULL, filename_filters);
 		if (filename) {
 			load_file(filename);
 		}
@@ -120,6 +121,7 @@ struct ImageIn : Module {
 
 	void load_file(char* fn) {
 		if (FILE *file = fopen(fn, "r")) {
+			(void)file; // does nothing, stops the compiler warning about variable being unused
 			int channels = 0;
 			image_data = stbi_load(fn, &width, &height, &channels, 4);
 			image = -1;

@@ -151,7 +151,6 @@ struct VideoDisplay : TransparentWidget {
 	float real_height = -1;
 	void drawLayer(const DrawArgs& args, int layer) override {
 		NVGcontext* vg = args.vg;
-		//nvgShapeAntiAlias(vg, false); no apprent effect?
 		if (module && (layer == 1)) {
 			if (image == -1 or module->resolution_changed) {
 				module->clear(); // initialise
