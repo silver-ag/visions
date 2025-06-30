@@ -84,12 +84,10 @@ struct ImageIn : Module {
 		if (y == height) {
 			y = height - 1;
 		}
-		//printf("x: %d, y: %d, xv: %f, yv: %f\n", x, y, x_voltage, y_voltage);
 
 		if (image > 0) {
 
 			int offset = ((4 * width) * y) + (4 * x);
-			printf("(%d/%d,%d/%d -> %d/%d)\n",x,width,y,height,offset,4*width*height);
 			float rh_voltage = 0;
 			float gs_voltage = 0;
 			float bv_voltage = 0;
