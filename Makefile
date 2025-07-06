@@ -8,6 +8,7 @@ CXXFLAGS +=
 
 # Careful about linking to shared libraries, since you can't assume much about the user's environment and library search path.
 # Static libraries are fine, but they should be added to this plugin's build system.
+include $(RACK_DIR)/arch.mk
 ifdef ARCH_WIN
 	LDFLAGS += -lopengl32
 endif
